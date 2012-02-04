@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
+    <groupId>com.proofpoint.hadoop</groupId>
+    <artifactId>galaxy-hadoop</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>galaxy-hadoop</name>
+    <url>https://github.com/electrum/galaxy-hadoop</url>
+
+    <scm>
+        <connection>scm:git:https://github.com/electrum/galaxy-hadoop.git</connection>
+        <developerConnection>scm:git:https://github.com/electrum/galaxy-hadoop.git</developerConnection>
+        <url>https://github.com/electrum/galaxy-hadoop</url>
+    </scm>
+
+    <modules>
+        <module>hadoop-jobtracker</module>
+        <module>hadoop-tasktracker</module>
+        <module>hadoop-namenode</module>
+        <module>hadoop-datanode</module>
+    </modules>
+
+    <properties>
+        <hadoop.version>1.0.0</hadoop.version>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>child-project-profile</id>
+            <!-- activate profile in child projects, but not this project -->
+            <activation>
+                <file>
+                    <missing>profile-activate-33510099096.do.not.remove.txt</missing>
+                </file>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.4</version>
+
+                        <executions>
+                            <execution>
+                                <id>copy</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>com.proofpoint.hadoop</groupId>
+                                            <artifactId>hadoop-common</artifactId>
+                                            <version>${hadoop.version}</version>
+                                            <type>tar.gz</type>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+
+                        <executions>
+                            <execution>
+                                <id>unpack</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+
+                                <configuration>
+                                    <target>
+                                        <untar dest="${project.build.directory}" compression="gzip">
+                                            <fileset dir="${project.build.directory}">
+                                                <include name="hadoop-common-${hadoop.version}.tar.gz"/>
+                                            </fileset>
+                                            <patternset>
+                                                <exclude name="**/docs/**"/>
+                                                <exclude name="**/src/**"/>
+                                                <exclude name="**/ivy/**"/>
+                                                <exclude name="**/lib/jdiff/**"/>
+                                                <exclude name="**/share/**"/>
+                                                <exclude name="**/contrib/hdfsproxy/**"/>
+                                                <exclude name="**/contrib/hod/**"/>
+                                            </patternset>
+                                        </untar>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>2.2</version>
+
+                        <configuration>
+                            <attach>false</attach>
+                            <descriptors>
+                                <descriptor>src/main/assembly/distribution.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+
+                        <executions>
+                            <execution>
+                                <id>package</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>1.5</version>
+
+                        <executions>
+                            <execution>
+                                <id>attach-distribution-tar.gz</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+
+                                <configuration>
+                                    <artifacts>
+                                        <artifact>
+                                            <file>${project.build.directory}/${project.artifactId}-${project.version}-distribution.tar.gz</file>
+                                            <type>tar.gz</type>
+                                        </artifact>
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

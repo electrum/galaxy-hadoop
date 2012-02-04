@@ -1,0 +1,4 @@
+DO NOT REMOVE THIS FILE!
+
+This file must exist to allow activation of a Maven profile in child
+projects, but not in this project.  See pom.xml for usage details.
