@@ -40,13 +40,7 @@ class BaseHadoopLauncher < Launch::AbstractLauncher
   def finalize_options
     @options[:system_properties].merge!(@options[:node_properties])
 
-    jvm_config_path = @options[:jvm_config_path]
-
-    unless File.exists?(jvm_config_path)
-      raise Launch::CommandError.new(:config_missing, "JVM config file is missing: #{jvm_config_path}")
-    end
-
-    jvm_properties = Launch::Properties.load_lines(jvm_config_path).join(' ')
+    jvm_properties = Launch::Properties.try_load_lines(@options[:jvm_config_path]).join(' ')
 
     system_properties = @options[:system_properties].
       map { |k, v| "-D#{k}=#{v}" }.

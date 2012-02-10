@@ -71,6 +71,10 @@ module Launch
       end
     end
 
+    def self.try_load_lines(path)
+      File.exists?(path) ? load_lines(path) : []
+    end
+
     def self.load_properties(path)
       entries = load_lines(path).map do |line|
         line.split('=', 2).map(&:strip)
