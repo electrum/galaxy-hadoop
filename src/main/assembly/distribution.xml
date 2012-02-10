@@ -8,12 +8,18 @@
 
     <fileSets>
         <fileSet>
-            <directory>src/main/scripts</directory>
-            <outputDirectory>/</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>${project.build.directory}/hadoop-${hadoop.version}</directory>
             <outputDirectory>/</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${project.parent.basedir}/src/main/scripts</directory>
+            <outputDirectory>/bin/</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/scripts</directory>
+            <outputDirectory>/bin</outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>

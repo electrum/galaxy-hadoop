@@ -103,6 +103,7 @@
                                                 <exclude name="**/contrib/hod/**"/>
                                             </patternset>
                                         </untar>
+                                        <chmod file="${project.build.directory}/hadoop-${hadoop.version}/bin/hadoop" perm="755"/>
                                     </target>
                                 </configuration>
                             </execution>
