@@ -94,13 +94,31 @@
                                                 <include name="hadoop-common-${hadoop.version}.tar.gz"/>
                                             </fileset>
                                             <patternset>
+                                                <exclude name="**/build.xml"/>
+                                                <exclude name="**/ivy.xml"/>
                                                 <exclude name="**/docs/**"/>
                                                 <exclude name="**/src/**"/>
                                                 <exclude name="**/ivy/**"/>
                                                 <exclude name="**/lib/jdiff/**"/>
+                                                <exclude name="**/c++/**"/>
+                                                <exclude name="**/libexec/**"/>
+                                                <exclude name="**/sbin/**"/>
                                                 <exclude name="**/share/**"/>
                                                 <exclude name="**/contrib/hdfsproxy/**"/>
                                                 <exclude name="**/contrib/hod/**"/>
+                                                <exclude name="**/bin/hadoop-daemon*"/>
+                                                <exclude name="**/bin/rcc"/>
+                                                <exclude name="**/bin/slaves.sh"/>
+                                                <exclude name="**/bin/start-*"/>
+                                                <exclude name="**/bin/stop-*"/>
+                                                <exclude name="**/bin/task-controller"/>
+                                                <exclude name="**/conf/masters"/>
+                                                <exclude name="**/conf/slaves"/>
+                                                <exclude name="**/conf/*.example"/>
+                                                <exclude name="**/conf/taskcontroller.cfg"/>
+                                                <exclude name="**/conf/core-site.xml"/>
+                                                <exclude name="**/conf/hdfs-site.xml"/>
+                                                <exclude name="**/conf/mapred-site.xml"/>
                                             </patternset>
                                         </untar>
                                         <chmod file="${project.build.directory}/hadoop-${hadoop.version}/bin/hadoop" perm="755"/>
