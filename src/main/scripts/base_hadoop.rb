@@ -50,6 +50,29 @@ class BaseHadoopLauncher < Launch::AbstractLauncher
     @options[:environment]['HADOOP_OPTS'] = "#{jvm_properties} #{system_properties}"
   end
 
+  def force_symlink(src, dest)
+    return if src == dest
+    if File.exists?(dest) && !File.symlink?(dest)
+      raise "Destination exists and is not a symlink: #{dest}"
+    end
+    File.delete(dest) rescue nil
+    File.symlink(src, dest)
+  end
+
+  def symlink_install_dirs(*dirs)
+    dirs.each do |dir|
+      force_symlink(File.join(@install_path, dir), File.join(@options[:data_dir], dir))
+    end
+  end
+
+  def run_custom_setup
+    symlink_install_dirs('bin', 'conf', 'contrib', 'lib', 'webapps')
+
+    interpolate_config('core-site.xml', {
+      'namenode.address' => 'localhost',
+    })
+  end
+
   def build_command_line(daemon)
     hadoop = File.join(@install_path, 'bin', 'hadoop')
     build_hadoop_command(hadoop)
@@ -57,5 +80,40 @@ class BaseHadoopLauncher < Launch::AbstractLauncher
 
   def build_hadoop_command(hadoop)
     throw NotImplementedError
+  end
+
+  def run_hadoop_command(*command)
+    hadoop = File.join(@install_path, 'bin', 'hadoop')
+    command = [hadoop] + command
+
+    Pathname.new(@options[:log_path]).dirname.mkpath
+
+    pid = Process.spawn(@options[:environment],
+                        *command,
+                        :chdir => @options[:data_dir],
+                        :umask => 0027,
+                        :in => '/dev/null',
+                        :out => [@options[:log_path], "a"],
+                        :err => [:child, :out],
+                        :unsetenv_others => true,
+                        :pgroup => true)
+    Process.wait(pid)
+  end
+
+  def interpolate_config(name, vars)
+    path = File.join(@install_path, 'etc', name)
+    raise Launch::CommandError.new(:config_missing, "Config file is missing: #{path}") unless File.exists?(path)
+    config = IO.read(path)
+
+    vars.each do |key, value|
+      var = "\#{#{key}}"
+      unless config.include?(var)
+        raise Launch::CommandError.new(:config_missing, "Replacement variable #{var} not found in file: #{path}")
+      end
+      config = config.gsub(var, value)
+    end
+
+    out = File.join(@options[:data_dir], 'conf', name)
+    File.open(out, 'w') { |f| f.write(config) }
   end
 end

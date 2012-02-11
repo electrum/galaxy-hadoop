@@ -334,7 +334,13 @@ module Launch
         puts
       end
 
-      run_custom_setup
+      begin
+        run_custom_setup
+      rescue CommandError => e
+        puts e.message
+        puts e.code if @options[:verbose]
+        exit ERROR_CODES[e.code]
+      end
 
       run(args)
     end
