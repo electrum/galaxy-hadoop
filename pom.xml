@@ -136,7 +136,8 @@
                         <configuration>
                             <attach>false</attach>
                             <descriptors>
-                                <descriptor>src/main/assembly/distribution.xml</descriptor>
+                                <!--suppress MavenModelInspection -->
+                                <descriptor>${project.parent.basedir}/src/main/assembly/distribution.xml</descriptor>
                             </descriptors>
                         </configuration>
 
