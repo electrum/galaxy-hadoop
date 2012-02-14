@@ -44,7 +44,7 @@ class BaseHadoopLauncher < Launch::AbstractLauncher
 
     system_properties = @options[:system_properties].
       map { |k, v| "-D#{k}=#{v}" }.
-      map { |v| escape_shell_arg(v) }.
+      map { |v| Launch::Util.escape_shell_arg(v) }.
       join(' ')
 
     @options[:environment]['HADOOP_OPTS'] = "#{jvm_properties} #{system_properties}"
