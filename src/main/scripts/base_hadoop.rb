@@ -68,8 +68,12 @@ class BaseHadoopLauncher < Launch::AbstractLauncher
   def run_custom_setup
     symlink_install_dirs('bin', 'conf', 'contrib', 'lib', 'webapps')
 
+    inventory = Launch::ServiceInventory.new(@options)
+    hdfs = inventory.properties('hadoop-namenode')['hdfs']
+    raise 'No HDFS property for namenode service' unless hdfs
+
     interpolate_config('core-site.xml', {
-      'namenode.address' => 'localhost',
+      'namenode.hdfs.uri' => hdfs,
     })
   end
 

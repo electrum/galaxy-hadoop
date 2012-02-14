@@ -17,6 +17,9 @@
 require 'fileutils'
 require 'optparse'
 require 'pathname'
+require 'uri'
+require 'open-uri'
+require 'json'
 
 module Launch
   class Util
@@ -87,6 +90,35 @@ module Launch
     end
   end
 
+
+  class ServiceInventory
+    def initialize(options)
+      url = options[:node_properties]['service-inventory.uri']
+      raise 'No service-inventory.uri property in node.properties' unless url
+
+      uri = URI.parse(url)
+      data = uri.scheme == 'file' ? IO.read(uri.path) : uri.read
+
+      json = JSON.parse(data)
+      @services = json['services']
+      raise 'No services field in service inventory' unless @services
+    end
+
+    def services(type, pool = 'general')
+      @services.find_all { |i| i['type'] == type && i['pool'] == pool }
+    end
+
+    def service(type, pool = 'general')
+      found = services(type, pool)
+      raise "No services found for #{type}/#{pool}" if found.empty?
+      raise "Found multiple services for #{type}/#{pool}" if found.length > 1
+      found.first
+    end
+
+    def properties(type, pool = 'general')
+      service(type, pool)['properties'] || {}
+    end
+  end
 
   class Pid
     attr_reader :path
