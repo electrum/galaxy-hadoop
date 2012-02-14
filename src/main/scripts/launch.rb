@@ -53,7 +53,7 @@ module Launch
     end
 
     def self.escape_shell_arg(string)
-      if string =~ /[^\w.\/-]/
+      if string =~ /[^\w.:\/-]/
         string = string.gsub("'", %q('\\\''))
         "'#{string}'"
       else
