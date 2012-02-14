@@ -38,14 +38,14 @@ class BaseHadoopLauncher < Launch::AbstractLauncher
   end
 
   def finalize_options
-    @options[:system_properties].merge!(@options[:node_properties])
-
     jvm_properties = Launch::Properties.try_load_lines(@options[:jvm_config_path]).join(' ')
 
-    system_properties = @options[:system_properties].
-      map { |k, v| "-D#{k}=#{v}" }.
-      map { |v| Launch::Util.escape_shell_arg(v) }.
-      join(' ')
+    @options[:system_properties].each do |k, v|
+      if Launch::Util.escape_shell_arg(v) != v
+        raise "Escaping required but not supported for system property: #{k}=#{v}"
+      end
+    end
+    system_properties = @options[:system_properties].map { |k, v| "-D#{k}=#{v}" }.join(' ')
 
     @options[:environment]['HADOOP_OPTS'] = "#{jvm_properties} #{system_properties}"
   end
