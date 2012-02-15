@@ -104,18 +104,19 @@ module Launch
       raise 'No services field in service inventory' unless @services
     end
 
-    def services(type, pool = 'general')
+    def services(type, pool = nil)
       @services.find_all { |i| i['type'] == type && i['pool'] == pool }
     end
 
-    def service(type, pool = 'general')
+    def service(type, pool = nil)
       found = services(type, pool)
-      raise "No services found for #{type}/#{pool}" if found.empty?
-      raise "Found multiple services for #{type}/#{pool}" if found.length > 1
+      name = type + (pool ? "/#{pool}" : '')
+      raise "No services found for #{name}" if found.empty?
+      raise "Found multiple services for #{name}" if found.length > 1
       found.first
     end
 
-    def properties(type, pool = 'general')
+    def properties(type, pool = nil)
       service(type, pool)['properties'] || {}
     end
   end
